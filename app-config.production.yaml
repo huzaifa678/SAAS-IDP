@@ -1,0 +1,103 @@
+app:
+  # The portal host (ingress-nginx + cert-manager / Istio gateway, same private
+  # edge as the ArgoCD UI). BACKSTAGE_HOST is set per env.
+  baseUrl: https://${BACKSTAGE_HOST}
+
+backend:
+  baseUrl: https://${BACKSTAGE_HOST}
+  cors:
+    origin: https://${BACKSTAGE_HOST}
+  database:
+    client: pg
+    connection:
+      host: ${POSTGRES_HOST}
+      port: ${POSTGRES_PORT}
+      user: ${POSTGRES_USER}
+      password: ${POSTGRES_PASSWORD}
+      database: ${POSTGRES_DB}
+      ssl:
+        require: true
+        rejectUnauthorized: false
+
+kubernetes:
+  serviceLocatorMethod:
+    type: multiTenant
+  clusterLocatorMethods:
+    # In-cluster: Backstage reads the cluster API via its own ServiceAccount
+    # token (mounted at the standard path) + the backstage-read ClusterRole.
+    - type: 'localKubectlProxy'
+
+argocd:
+  appLocatorMethods:
+    - type: config
+      instances:
+        - name: saas
+          # Internal ArgoCD UI (see SAAS-Continious-Delivery ingress). Backstage
+          # runs in-cluster so it reaches the argocd-server Service directly.
+          url: ${ARGOCD_URL}
+          token: ${ARGOCD_AUTH_TOKEN}
+
+auth:
+  environment: production
+  providers:
+    # Keycloak via the generic OIDC provider. metadataUrl is the realm's
+    # discovery doc (e.g. https://<keycloak-host>/realms/<realm>/.well-known/openid-configuration);
+    # clientId/secret come from the backstage-oidc secret (synced by ESO).
+    oidc:
+      production:
+        metadataUrl: ${KEYCLOAK_METADATA_URL}
+        clientId: ${KEYCLOAK_CLIENT_ID}
+        clientSecret: ${KEYCLOAK_CLIENT_SECRET}
+        prompt: auto
+        signIn:
+          resolvers:
+            - resolver: emailMatchingUserEntityProfileEmail
+            - resolver: emailLocalPartMatchingUserEntityName
+
+catalog:
+  locations:
+    - type: file
+      target: ./catalog/all.yaml
+      rules:
+        - allow: [Component, System, API, Resource, Location, Group, User, Domain]
+    - type: file
+      target: ./catalog/templates/new-service/template.yaml
+      rules:
+        - allow: [Template]
+    - type: file
+      target: ./catalog/templates/register-existing/template.yaml
+      rules:
+        - allow: [Template]
+    - type: file
+      target: ./catalog/templates/promote-image/template.yaml
+      rules:
+        - allow: [Template]
+    - type: file
+      target: ./catalog/templates/request-database/template.yaml
+      rules:
+        - allow: [Template]
+    # The 5 existing services' descriptors (co-located with their charts in the
+    # CD repo). url locations are env-agnostic — same entries as base config.
+    - type: url
+      target: https://github.com/huzaifa678/SAAS-Continious-Delivery/blob/main/charts/agent-service/catalog-info.yaml
+    - type: url
+      target: https://github.com/huzaifa678/SAAS-Continious-Delivery/blob/main/charts/auth-service/catalog-info.yaml
+    - type: url
+      target: https://github.com/huzaifa678/SAAS-Continious-Delivery/blob/main/charts/billing-service/catalog-info.yaml
+    - type: url
+      target: https://github.com/huzaifa678/SAAS-Continious-Delivery/blob/main/charts/subscription-service/catalog-info.yaml
+    - type: url
+      target: https://github.com/huzaifa678/SAAS-Continious-Delivery/blob/main/charts/usage-service/catalog-info.yaml
+  providers:
+    github:
+      # Ingest every repo in the org that carries a catalog-info.yaml — this is
+      # how each microservice repo self-registers its own catalog entities.
+      saasOrg:
+        organization: 'huzaifa678'
+        catalogPath: '/catalog-info.yaml'
+        schedule:
+          frequency: { minutes: 30 }
+          timeout: { minutes: 3 }
+
+permission:
+  enabled: true

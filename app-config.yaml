@@ -1,0 +1,121 @@
+app:
+  title: SaaS Developer Portal
+  baseUrl: http://localhost:3000
+
+organization:
+  name: SaaS Platform
+
+backend:
+  baseUrl: http://localhost:7007
+  listen:
+    port: 7007
+  csp:
+    connect-src: ["'self'", 'http:', 'https:']
+  cors:
+    origin: http://localhost:3000
+    methods: [GET, HEAD, PATCH, POST, PUT, DELETE]
+    credentials: true
+  database:
+    client: better-sqlite3
+    connection: ':memory:'
+  auth:
+    keys:
+      - secret: ${BACKEND_SECRET}
+
+integrations:
+  github:
+    - host: github.com
+      # A GitHub App or PAT with repo read — synced by ESO into the backstage
+      # secret. Enables repo discovery, catalog ingestion and PR/Actions plugins.
+      token: ${GITHUB_TOKEN}
+
+# The portal's own source of truth is the catalog/ dir plus GitHub org discovery.
+# Each microservice repo owns its catalog-info.yaml (discovered in production).
+catalog:
+  import:
+    entityFilename: catalog-info.yaml
+  rules:
+    - allow: [Component, System, API, Resource, Location, Group, User, Domain, Template]
+  locations:
+    # NOTE ON PATHS: config `file` location targets resolve relative to the
+    # backend's CWD, which is packages/backend under `yarn dev` — hence the
+    # `../../` climb back to the repo root. (The container overrides this whole
+    # list in app-config.production.yaml, where CWD is /app.) Getting this wrong
+    # is the classic "my templates don't show up under /create" trap.
+    #
+    # Seed entities describing THIS platform (systems, teams, the CD repo).
+    - type: file
+      target: ../../catalog/all.yaml
+      rules:
+        - allow: [Component, System, API, Resource, Location, Group, User, Domain]
+    # Scaffolder templates — separate locations that allow the Template kind
+    # (the all.yaml location above deliberately does not). Static file locations
+    # do NOT expand globs, so add one entry per template.
+    - type: file
+      target: ../../catalog/templates/new-service/template.yaml
+      rules:
+        - allow: [Template]
+    - type: file
+      target: ../../catalog/templates/register-existing/template.yaml
+      rules:
+        - allow: [Template]
+    - type: file
+      target: ../../catalog/templates/promote-image/template.yaml
+      rules:
+        - allow: [Template]
+    - type: file
+      target: ../../catalog/templates/request-database/template.yaml
+      rules:
+        - allow: [Template]
+    # The 5 existing services' descriptors, which live next to their charts in
+    # the CD repo. `url` locations work identically in dev and prod (resolved via
+    # the GitHub integration). They resolve once these files are pushed to main;
+    # long-term, move each catalog-info.yaml to its own service repo root and let
+    # GitHub org discovery pick them up automatically instead.
+    - type: url
+      target: https://github.com/huzaifa678/SAAS-Continious-Delivery/blob/main/charts/agent-service/catalog-info.yaml
+    - type: url
+      target: https://github.com/huzaifa678/SAAS-Continious-Delivery/blob/main/charts/auth-service/catalog-info.yaml
+    - type: url
+      target: https://github.com/huzaifa678/SAAS-Continious-Delivery/blob/main/charts/billing-service/catalog-info.yaml
+    - type: url
+      target: https://github.com/huzaifa678/SAAS-Continious-Delivery/blob/main/charts/subscription-service/catalog-info.yaml
+    - type: url
+      target: https://github.com/huzaifa678/SAAS-Continious-Delivery/blob/main/charts/usage-service/catalog-info.yaml
+
+# Argo CD plugin — reads sync/health of the Applications ArgoCD manages. The
+# Roadie backend requires url+token to be PRESENT at startup, so local dev uses
+# unreachable placeholders (no ArgoCD running locally — the cards just stay empty).
+# Prod overlays the real internal host/token in app-config.production.yaml.
+argocd:
+  appLocatorMethods:
+    - type: config
+      instances:
+        - name: saas
+          url: http://localhost:8081
+          token: placeholder-local-token
+
+# Kubernetes plugin — surfaces live pod/Deployment health per component. In-cluster
+# auth (the Backstage ServiceAccount token + a read ClusterRole) is configured in
+# app-config.production.yaml; empty here so local dev doesn't try.
+kubernetes:
+  serviceLocatorMethod:
+    type: multiTenant
+  clusterLocatorMethods: []
+
+techdocs:
+  builder: 'local'
+  generator:
+    runIn: 'local'
+  publisher:
+    type: 'local'
+
+auth:
+  environment: development
+  providers:
+    guest: {}
+
+scaffolder: {}
+
+permission:
+  enabled: false
