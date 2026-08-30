@@ -1,0 +1,27 @@
+---
+replicas: 1
+
+image:
+  repository: ""  
+  tag: "dev"
+
+istio:
+  enabled: false
+
+# Dev: fast canary, no analysis (no Prometheus dependency in dev path)
+rollout:
+  analysis:
+    enabled: false
+  steps:
+    - setWeight: 50
+    - pause:
+        duration: "10s"
+    - setWeight: 100
+
+keda:
+  enabled: false
+
+# Dev only: expose GraphQL introspection + Apollo landing page (see apollo.server.js).
+env:
+  - name: APP_ENV
+    value: dev
