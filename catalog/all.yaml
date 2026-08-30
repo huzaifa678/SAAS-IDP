@@ -1,0 +1,87 @@
+# Seed catalog describing the SaaS platform itself. This is the portal's initial
+# picture of the world; GitHub org discovery (app-config.production.yaml) layers
+# each microservice repo's own catalog-info.yaml on top — the per-service
+# Components/APIs live in those repos, not here.
+---
+apiVersion: backstage.io/v1alpha1
+kind: Domain
+metadata:
+  name: saas
+  description: The multi-tenant SaaS platform — microservices, GitOps and infra.
+spec:
+  owner: platform-team
+---
+apiVersion: backstage.io/v1alpha1
+kind: Group
+metadata:
+  name: platform-team
+  description: Owns the infra, GitOps CD and CI for the SaaS platform.
+spec:
+  type: team
+  children: []
+---
+apiVersion: backstage.io/v1alpha1
+kind: User
+metadata:
+  name: huzaifagill
+spec:
+  profile:
+    email: huzaifagill411@gmail.com
+  memberOf: [platform-team]
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: saas-services
+  description: The application microservices (auth, billing, subscription, usage, agent).
+spec:
+  owner: platform-team
+  domain: saas
+---
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: platform
+  description: GitOps CD (ArgoCD), Crossplane infra, Istio, Keycloak, observability.
+spec:
+  owner: platform-team
+  domain: saas
+---
+# The GitOps control-plane repo. The per-service Components are expected to come
+# from each microservice repo's own catalog-info.yaml via org discovery.
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: saas-continious-delivery
+  description: App-of-apps GitOps repo — ArgoCD ApplicationSets, Helm charts, Crossplane.
+  annotations:
+    github.com/project-slug: huzaifa678/SAAS-Continious-Delivery
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-team
+  system: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: backstage
+  description: This developer portal.
+  annotations:
+    github.com/project-slug: huzaifa678/SAAS-IDP
+    backstage.io/kubernetes-label-selector: app.kubernetes.io/name=backstage
+spec:
+  type: service
+  lifecycle: production
+  owner: platform-team
+  system: platform
+---
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: keycloak
+  description: Keycloak — SSO / OIDC identity provider for the platform.
+spec:
+  type: identity-provider
+  owner: platform-team
+  system: platform
