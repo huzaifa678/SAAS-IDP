@@ -1,0 +1,213 @@
+<svg viewBox="0 0 1280 700" xmlns="http://www.w3.org/2000/svg" font-family="Inter, 'Segoe UI', system-ui, -apple-system, sans-serif">
+  <defs>
+    <linearGradient id="bg" x1="0" y1="0" x2="0" y2="1">
+      <stop offset="0" stop-color="#FBFCFE"/>
+      <stop offset="1" stop-color="#EEF2F7"/>
+    </linearGradient>
+    <linearGradient id="titleAccent" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#6366F1"/>
+      <stop offset="0.5" stop-color="#10B981"/>
+      <stop offset="1" stop-color="#326CE5"/>
+    </linearGradient>
+    <linearGradient id="calloutFill" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0" stop-color="#EEF0FE"/>
+      <stop offset="1" stop-color="#F5F7FF"/>
+    </linearGradient>
+    <filter id="shadow" x="-20%" y="-20%" width="140%" height="150%">
+      <feDropShadow dx="0" dy="3" stdDeviation="6" flood-color="#0F172A" flood-opacity="0.10"/>
+    </filter>
+    <filter id="softshadow" x="-20%" y="-20%" width="140%" height="160%">
+      <feDropShadow dx="0" dy="1" stdDeviation="2" flood-color="#0F172A" flood-opacity="0.08"/>
+    </filter>
+    <marker id="arrow" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#94A3B8"/>
+    </marker>
+    <marker id="arrowDash" viewBox="0 0 10 10" refX="8" refY="5" markerWidth="7" markerHeight="7" orient="auto-start-reverse">
+      <path d="M0 0 L10 5 L0 10 z" fill="#CBD5E1"/>
+    </marker>
+  </defs>
+
+  <rect width="1280" height="700" fill="url(#bg)"/>
+
+  <!-- ══ Title ══ -->
+  <rect x="40" y="34" width="46" height="6" rx="3" fill="url(#titleAccent)"/>
+  <text x="40" y="70" font-size="30" font-weight="700" fill="#0F172A">The Golden Path</text>
+  <text x="40" y="96" font-size="15" fill="#64748B">One merge ships it — Backstage writes Git, ArgoCD does every apply.</text>
+
+  <!-- ══ Stage labels ══ -->
+  <g font-size="11.5" font-weight="700" letter-spacing="1.4" fill="#94A3B8" text-anchor="middle">
+    <text x="211"  y="150">AUTHOR</text>
+    <text x="508"  y="150">SOURCE OF TRUTH · GIT</text>
+    <text x="826"  y="150">CI + GITOPS ENGINE</text>
+    <text x="1116" y="150">CLUSTER</text>
+  </g>
+
+  <!-- ══ Connectors (under cards) ══ -->
+  <g fill="none" stroke="#94A3B8" stroke-width="2">
+    <path d="M327 212 L384 212" marker-end="url(#arrow)"/>
+    <path d="M327 324 L384 324" marker-end="url(#arrow)"/>
+    <path d="M626 268 L682 268" marker-end="url(#arrow)"/>
+    <path d="M962 340 C984 340 984 268 996 268" marker-end="url(#arrow)"/>
+  </g>
+  <path d="M962 192 C984 192 984 244 996 244" fill="none" stroke="#CBD5E1" stroke-width="2" stroke-dasharray="4 4" marker-end="url(#arrowDash)"/>
+
+  <g font-size="11" fill="#64748B" text-anchor="middle">
+    <text x="355" y="204">opens PR</text>
+    <text x="355" y="316">merge</text>
+    <text x="654" y="260">on merge</text>
+    <text x="1002" y="300" text-anchor="start">apply</text>
+    <text x="1002" y="228" text-anchor="start" fill="#94A3B8">pull</text>
+  </g>
+
+  <!-- ══ COL 1 · Author ══ -->
+  <!-- A1 Developer / Backstage -->
+  <g filter="url(#shadow)">
+    <rect x="95" y="166" width="232" height="92" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/>
+  </g>
+  <rect x="95" y="166" width="5" height="92" rx="2.5" fill="#6366F1"/>
+  <circle cx="132" cy="200" r="17" fill="#EEF0FE"/>
+  <g stroke="#6366F1" stroke-width="1.7" fill="none" stroke-linecap="round">
+    <circle cx="132" cy="195" r="4.2" fill="#6366F1" stroke="none"/>
+    <path d="M124 210 c0 -5 3.6 -7.5 8 -7.5 s8 2.5 8 7.5"/>
+  </g>
+  <text x="162" y="196" font-size="15" font-weight="700" fill="#0F172A">Developer</text>
+  <text x="162" y="215" font-size="12.5" fill="#475569">Backstage → /create</text>
+  <text x="162" y="233" font-size="11" fill="#94A3B8">new-service template</text>
+
+  <!-- B1 SAAS-IDP -->
+  <g filter="url(#shadow)">
+    <rect x="95" y="278" width="232" height="92" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/>
+  </g>
+  <rect x="95" y="278" width="5" height="92" rx="2.5" fill="#6366F1"/>
+  <circle cx="132" cy="312" r="17" fill="#EEF0FE"/>
+  <g stroke="#6366F1" stroke-width="1.7" fill="none" stroke-linecap="round" stroke-linejoin="round">
+    <rect x="125" y="305" width="14" height="13" rx="1.6"/>
+    <path d="M125 309 h14 M130 305 v-2.5 M137 305 v-2.5"/>
+  </g>
+  <text x="162" y="308" font-size="15" font-weight="700" fill="#0F172A">SAAS-IDP</text>
+  <text x="162" y="327" font-size="12.5" fill="#475569">portal source repo</text>
+  <text x="162" y="345" font-size="11" fill="#94A3B8">build-backstage-image CI</text>
+
+  <!-- ══ COL 2 · Git (single tall card) ══ -->
+  <g filter="url(#shadow)">
+    <rect x="392" y="166" width="234" height="204" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/>
+  </g>
+  <rect x="392" y="166" width="234" height="46" rx="14" fill="#ECFDF5"/>
+  <rect x="392" y="198" width="234" height="14" fill="#ECFDF5"/>
+  <circle cx="424" cy="189" r="13" fill="#10B981"/>
+  <g stroke="#FFFFFF" stroke-width="1.7" fill="none" stroke-linecap="round">
+    <circle cx="420" cy="185" r="2.4"/><circle cx="420" cy="194" r="2.4"/><circle cx="429" cy="187" r="2.4"/>
+    <path d="M420 187.4 v4.2 M420 189 c0 -3 9 -1 9 -2"/>
+  </g>
+  <text x="446" y="194" font-size="14.5" font-weight="700" fill="#065F46">SAAS-Continious-Delivery</text>
+
+  <!-- Git sub-row: service chart -->
+  <rect x="410" y="228" width="198" height="58" rx="10" fill="#F8FAFC" stroke="#E7EDF3"/>
+  <text x="424" y="250" font-size="12.5" font-weight="700" fill="#334155">Service PR</text>
+  <text x="424" y="270" font-size="12" font-family="ui-monospace, 'SF Mono', Menlo, monospace" fill="#0EA36B">charts/&lt;svc&gt;/</text>
+  <!-- Git sub-row: portal addon -->
+  <rect x="410" y="296" width="198" height="58" rx="10" fill="#F8FAFC" stroke="#E7EDF3"/>
+  <text x="424" y="318" font-size="12.5" font-weight="700" fill="#334155">Portal addon</text>
+  <text x="424" y="338" font-size="12" font-family="ui-monospace, 'SF Mono', Menlo, monospace" fill="#0EA36B">gitops/infra/backstage/</text>
+
+  <!-- ══ COL 3 · CI + GitOps (three cards) ══ -->
+  <!-- C1 registry -->
+  <g filter="url(#softshadow)"><rect x="690" y="166" width="272" height="54" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+  <rect x="690" y="166" width="5" height="54" rx="2.5" fill="#F59E0B"/>
+  <circle cx="716" cy="193" r="15" fill="#FEF3E2"/>
+  <g stroke="#F59E0B" stroke-width="1.7" fill="none" stroke-linejoin="round" stroke-linecap="round">
+    <path d="M716 185 l7 4 v7 l-7 4 l-7 -4 v-7 z"/><path d="M716 185 v8 M709 189 l7 4 l7 -4"/>
+  </g>
+  <text x="740" y="190" font-size="13.5" font-weight="700" fill="#0F172A">push-charts · build-image</text>
+  <text x="740" y="208" font-size="11.5" fill="#64748B">packages → ECR (OCI)</text>
+
+  <!-- C2 appsets -->
+  <g filter="url(#softshadow)"><rect x="690" y="238" width="272" height="54" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+  <rect x="690" y="238" width="5" height="54" rx="2.5" fill="#F59E0B"/>
+  <circle cx="716" cy="265" r="15" fill="#FEF3E2"/>
+  <g stroke="#F59E0B" stroke-width="1.7" fill="none" stroke-linecap="round">
+    <circle cx="716" cy="265" r="7"/><path d="M716 258 v-3 M716 272 v3 M709 265 h-3 M723 265 h3"/>
+  </g>
+  <text x="740" y="262" font-size="13.5" font-weight="700" fill="#0F172A">ApplicationSets</text>
+  <text x="740" y="280" font-size="11.5" fill="#64748B">auto-discover charts/* · infra/*</text>
+
+  <!-- C3 argocd -->
+  <g filter="url(#softshadow)"><rect x="690" y="310" width="272" height="54" rx="12" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+  <rect x="690" y="310" width="5" height="54" rx="2.5" fill="#EF6C2E"/>
+  <circle cx="716" cy="337" r="15" fill="#FDECE3"/>
+  <g stroke="#EF6C2E" stroke-width="1.7" fill="none" stroke-linecap="round">
+    <path d="M710 333 a7 7 0 0 1 12 -1.5"/><path d="M722 328 v4 h-4"/>
+    <path d="M722 341 a7 7 0 0 1 -12 1.5"/><path d="M710 346 v-4 h4"/>
+  </g>
+  <text x="740" y="334" font-size="13.5" font-weight="700" fill="#0F172A">ArgoCD</text>
+  <text x="740" y="352" font-size="11.5" fill="#64748B">render &amp; sync (self-heal)</text>
+
+  <!-- ══ COL 4 · Cluster ══ -->
+  <g filter="url(#shadow)"><rect x="1000" y="166" width="232" height="204" rx="14" fill="#FFFFFF" stroke="#E2E8F0"/></g>
+  <rect x="1000" y="166" width="232" height="46" rx="14" fill="#EAF1FE"/>
+  <rect x="1000" y="198" width="232" height="14" fill="#EAF1FE"/>
+  <g transform="translate(1032,189)" stroke="#326CE5" stroke-width="1.7" fill="none">
+    <polygon points="0,-11 9.5,-5.5 9.5,5.5 0,11 -9.5,5.5 -9.5,-5.5" fill="#326CE5" stroke="none"/>
+    <g stroke="#FFFFFF" stroke-width="1.4"><circle cx="0" cy="0" r="3.4"/><path d="M0 -3.4 V-7 M2.9 1.7 L6.1 3.6 M-2.9 1.7 L-6.1 3.6"/></g>
+  </g>
+  <text x="1054" y="194" font-size="15" font-weight="700" fill="#1E3A8A">Cluster</text>
+
+  <rect x="1018" y="228" width="196" height="58" rx="10" fill="#F8FAFC" stroke="#E7EDF3"/>
+  <text x="1032" y="250" font-size="12.5" font-weight="700" fill="#334155">ns: saas-apps</text>
+  <text x="1032" y="270" font-size="11.5" fill="#64748B">Rollout · KEDA · Istio</text>
+
+  <rect x="1018" y="296" width="196" height="58" rx="10" fill="#F8FAFC" stroke="#E7EDF3"/>
+  <text x="1032" y="318" font-size="12.5" font-weight="700" fill="#334155">ns: backstage</text>
+  <text x="1032" y="337" font-size="11" fill="#326CE5">backstage.freeeasycrypto.com</text>
+
+  <!-- ══ Substrate band ══ -->
+  <rect x="95" y="402" width="1137" height="96" rx="14" fill="#FFFFFF" stroke="#E7EDF3"/>
+  <path d="M716 364 V402" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <path d="M1116 370 V402" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <path d="M509 370 V402" stroke="#CBD5E1" stroke-width="1.5" stroke-dasharray="4 4"/>
+  <text x="114" y="428" font-size="11.5" font-weight="700" letter-spacing="1.2" fill="#94A3B8">PLATFORM SUBSTRATE · PROVISIONED ONCE</text>
+
+  <g font-size="12">
+    <!-- pill helper: rect + dot + labels -->
+    <g><rect x="114" y="444" width="205" height="42" rx="9" fill="#F8FAFC" stroke="#E7EDF3"/>
+      <circle cx="132" cy="465" r="4.5" fill="#8B5CF6"/>
+      <text x="146" y="461" font-weight="700" fill="#334155">Terraform</text>
+      <text x="146" y="477" font-size="10.5" fill="#94A3B8">RDS · saas-backstage-db</text></g>
+    <g><rect x="333" y="444" width="188" height="42" rx="9" fill="#F8FAFC" stroke="#E7EDF3"/>
+      <circle cx="351" cy="465" r="4.5" fill="#0EA5E9"/>
+      <text x="365" y="461" font-weight="700" fill="#334155">Crossplane</text>
+      <text x="365" y="477" font-size="10.5" fill="#94A3B8">tenant databases</text></g>
+    <g><rect x="535" y="444" width="228" height="42" rx="9" fill="#F8FAFC" stroke="#E7EDF3"/>
+      <circle cx="553" cy="465" r="4.5" fill="#10B981"/>
+      <text x="567" y="461" font-weight="700" fill="#334155">External Secrets</text>
+      <text x="567" y="477" font-size="10.5" fill="#94A3B8">AWS Secrets Mgr → K8s</text></g>
+    <g><rect x="777" y="444" width="248" height="42" rx="9" fill="#F8FAFC" stroke="#E7EDF3"/>
+      <circle cx="795" cy="465" r="4.5" fill="#EF6C2E"/>
+      <text x="809" y="461" font-weight="700" fill="#334155">external-dns · cert-manager</text>
+      <text x="809" y="477" font-size="10.5" fill="#94A3B8">Route53 DNS + TLS</text></g>
+    <g><rect x="1039" y="444" width="175" height="42" rx="9" fill="#F8FAFC" stroke="#E7EDF3"/>
+      <circle cx="1057" cy="465" r="4.5" fill="#F59E0B"/>
+      <text x="1071" y="461" font-weight="700" fill="#334155">ECR</text>
+      <text x="1071" y="477" font-size="10.5" fill="#94A3B8">images &amp; helm charts</text></g>
+  </g>
+
+  <!-- ══ Callout ══ -->
+  <g filter="url(#softshadow)"><rect x="95" y="522" width="1137" height="52" rx="12" fill="url(#calloutFill)" stroke="#DDE1FB"/></g>
+  <rect x="95" y="522" width="5" height="52" rx="2.5" fill="#6366F1"/>
+  <circle cx="127" cy="548" r="13" fill="#6366F1"/>
+  <g stroke="#FFFFFF" stroke-width="1.6" fill="none" stroke-linecap="round">
+    <rect x="122" y="547" width="10" height="7.5" rx="1.5"/><path d="M124 547 v-2.5 a3 3 0 0 1 6 0 v2.5"/>
+  </g>
+  <text x="152" y="545" font-size="14" font-weight="700" fill="#3730A3">Backstage has no cluster access.</text>
+  <text x="152" y="564" font-size="12.5" fill="#4C4F86">It only proposes a pull request — every apply to the cluster is done by ArgoCD (GitOps). The scaffolder is a Git robot.</text>
+
+  <!-- ══ Footer legend ══ -->
+  <g font-size="11.5" fill="#64748B">
+    <circle cx="102" cy="606" r="4.5" fill="#6366F1"/><text x="113" y="610">Author (Backstage / SAAS-IDP)</text>
+    <circle cx="300" cy="606" r="4.5" fill="#10B981"/><text x="311" y="610">Git — single source of truth</text>
+    <circle cx="503" cy="606" r="4.5" fill="#F59E0B"/><text x="514" y="610">CI + GitOps engine</text>
+    <circle cx="672" cy="606" r="4.5" fill="#EF6C2E"/><text x="683" y="610">ArgoCD</text>
+    <circle cx="752" cy="606" r="4.5" fill="#326CE5"/><text x="763" y="610">Cluster</text>
+  </g>
+  <text x="1232" y="636" font-size="11" fill="#94A3B8" text-anchor="end">Services: charts/*  ·  Portal: gitops/infra/backstage — both auto-discovered by ApplicationSets</text>
+</svg>
