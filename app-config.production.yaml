@@ -76,6 +76,10 @@ catalog:
       target: ./catalog/templates/request-database/template.yaml
       rules:
         - allow: [Template]
+    - type: file
+      target: ./catalog/templates/request-cache/template.yaml
+      rules:
+        - allow: [Template]
     # The 5 existing services' descriptors (co-located with their charts in the
     # CD repo). url locations are env-agnostic — same entries as base config.
     - type: url
