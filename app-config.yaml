@@ -67,6 +67,10 @@ catalog:
       target: ../../catalog/templates/request-database/template.yaml
       rules:
         - allow: [Template]
+    - type: file
+      target: ../../catalog/templates/request-cache/template.yaml
+      rules:
+        - allow: [Template]
     # The 5 existing services' descriptors, which live next to their charts in
     # the CD repo. `url` locations work identically in dev and prod (resolved via
     # the GitHub integration). They resolve once these files are pushed to main;
