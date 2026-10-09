@@ -1,4 +1,4 @@
-FROM public.ecr.aws/docker/library/node:20-bookworm-slim AS build
+FROM public.ecr.aws/docker/library/node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392 AS build
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
@@ -17,17 +17,20 @@ RUN yarn install --immutable
 COPY . .
 RUN yarn tsc && yarn build:all
 
-FROM public.ecr.aws/docker/library/node:20-bookworm-slim
+FROM public.ecr.aws/docker/library/node:22-bookworm-slim@sha256:c3de60bf2f9dd0ac6370e6117950ff62d6e339527e7472301c9c78a017978392
 
 RUN apt-get update && \
     apt-get install -y --no-install-recommends \
       python3 python3-pip python3-venv g++ build-essential libsqlite3-dev ca-certificates && \
     rm -rf /var/lib/apt/lists/* && \
     python3 -m venv /opt/techdocs && \
+    /opt/techdocs/bin/pip install --no-cache-dir --upgrade "setuptools>=78.1.1" && \
     /opt/techdocs/bin/pip install --no-cache-dir mkdocs-techdocs-core
 ENV PATH="/opt/techdocs/bin:${PATH}"
 
 RUN corepack enable
+
+RUN rm -rf /usr/local/lib/node_modules/npm /usr/local/bin/npm /usr/local/bin/npx
 
 USER node
 WORKDIR /app
