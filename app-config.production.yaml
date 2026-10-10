@@ -23,9 +23,19 @@ kubernetes:
   serviceLocatorMethod:
     type: multiTenant
   clusterLocatorMethods:
-    # In-cluster: Backstage reads the cluster API via its own ServiceAccount
-    # token (mounted at the standard path) + the backstage-read ClusterRole.
-    - type: 'localKubectlProxy'
+    # In-cluster: talk to the API server directly with the pod's own mounted
+    # ServiceAccount token (+ the backstage-read ClusterRole). The serviceAccount
+    # auth strategy reads that mounted token automatically when serviceAccountToken
+    # is omitted (KubeConfig.loadFromCluster), and caFile is the mounted cluster CA.
+    # So nothing has to store or inject the token — no Secrets Manager entry, no
+    # render Job, and no kubectl-proxy sidecar. (localKubectlProxy, used before,
+    # required a `kubectl proxy` running in the pod, which was never deployed.)
+    - type: 'config'
+      clusters:
+        - name: in-cluster
+          url: https://kubernetes.default.svc
+          authProvider: serviceAccount
+          caFile: /var/run/secrets/kubernetes.io/serviceaccount/ca.crt
 
 argocd:
   appLocatorMethods:
