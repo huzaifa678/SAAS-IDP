@@ -26,7 +26,7 @@ permissions:
 
 env:
   AWS_REGION: us-east-1
-  ECR_REPO: backstage
+  ECR_REPO: backstage-saas
 
 jobs:
   build:
@@ -82,11 +82,18 @@ jobs:
         id: ecr
         uses: aws-actions/amazon-ecr-login@v2
 
-      - name: Scan image (report-only — Backstage base image carries many deps)
-        uses: aquasecurity/trivy-action@0.28.0
+      - name: Trivy image scan (scan-before-push gate)
+        uses: aquasecurity/trivy-action@v0.36.0
         with:
-          image-ref: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ needs.build.outputs.tag }}
-          # Report, don't block: flip exit-code to '1' to gate on HIGH/CRITICAL.
-          exit-code: '0'
-          severity: HIGH,CRITICAL
+          scan-type: image
+          image-ref: ${{ steps.ecr.outputs.url }}:sha-${{ github.sha }}
+          scanners: vuln
+          severity: CRITICAL,HIGH
           ignore-unfixed: true
+          exit-code: "1"
+          format: table
+        env:
+          TRIVY_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-db:2
+          TRIVY_JAVA_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-java-db:1
+          TRIVY_USERNAME: ${{ github.actor }}
+          TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
