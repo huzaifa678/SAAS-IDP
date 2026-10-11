@@ -25,9 +25,17 @@ backend:
 integrations:
   github:
     - host: github.com
-      # A GitHub App or PAT with repo read — synced by ESO into the backstage
-      # secret. Enables repo discovery, catalog ingestion and PR/Actions plugins.
-      token: ${GITHUB_TOKEN}
+      # GitHub App (the shared SAAS gitops bot) — synced by ESO into the backstage
+      # secret as GITHUB_APP_* env. Enables repo discovery, catalog ingestion,
+      # PR/Actions plugins and scaffolder repo creation/pushes. All five fields are
+      # required by Backstage's GithubAppConfig; they are seeded into
+      # saas/backstage-input by the infra repo's seed-secrets.sh.
+      apps:
+        - appId: ${GITHUB_APP_ID}
+          clientId: ${GITHUB_APP_CLIENT_ID}
+          clientSecret: ${GITHUB_APP_CLIENT_SECRET}
+          webhookSecret: ${GITHUB_APP_WEBHOOK_SECRET}
+          privateKey: ${GITHUB_APP_PRIVATE_KEY}
 
 # The portal's own source of truth is the catalog/ dir plus GitHub org discovery.
 # Each microservice repo owns its catalog-info.yaml (discovered in production).

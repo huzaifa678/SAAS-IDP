@@ -19,6 +19,14 @@ on:
       - 'packages/**'
       - 'Dockerfile'
       - '.github/workflows/build-backstage-image.yml'
+  # Manual staging promotion: pin an immutable sha-<commit> tag (built & pushed by
+  # the build job on a main push) into gitops/infra/backstage/values-staging.yaml.
+  workflow_dispatch:
+    inputs:
+      image_tag:
+        description: "Immutable ECR tag to promote to STAGING (e.g. sha-<commit>)"
+        required: true
+        type: string
 
 permissions:
   id-token: write
@@ -30,6 +38,8 @@ env:
 
 jobs:
   build:
+    # Build/scan/push only on push & PR; manual dispatch is promotion-only.
+    if: github.event_name != 'workflow_dispatch'
     runs-on: ubuntu-latest
     outputs:
       tag: ${{ steps.meta.outputs.tag }}
@@ -55,6 +65,9 @@ jobs:
           aws ecr describe-repositories --repository-names "${ECR_REPO}" >/dev/null 2>&1 \
             || aws ecr create-repository --repository-name "${ECR_REPO}" \
                  --image-tag-mutability MUTABLE >/dev/null
+
+      - name: Set up Docker Buildx
+        uses: docker/setup-buildx-action@v3
 
       - name: Build and push image
         uses: docker/build-push-action@v6
@@ -97,3 +110,77 @@ jobs:
           TRIVY_JAVA_DB_REPOSITORY: ghcr.io/aquasecurity/trivy-java-db:1
           TRIVY_USERNAME: ${{ github.actor }}
           TRIVY_PASSWORD: ${{ secrets.GITHUB_TOKEN }}
+
+  # Manual staging promotion (workflow_dispatch only): pin the given immutable ECR
+  # tag into gitops/infra/backstage/values-staging.yaml in the CD repo, committed
+  # via the SAAS gitops GitHub App (no PAT).
+  #
+  # PREREQUISITE: this repo needs the GITOPS_APP_ID and GITOPS_APP_PRIVATE_KEY
+  # secrets (the SAAS gitops GitHub App the service repos use), and the App must be
+  # installed on huzaifa678/SAAS-Continious-Delivery with contents:write.
+  promote-staging:
+    if: github.event_name == 'workflow_dispatch'
+    runs-on: ubuntu-latest
+    steps:
+      - name: Generate GitHub App token
+        id: app-token
+        uses: actions/create-github-app-token@v3
+        with:
+          app-id: ${{ secrets.GITOPS_APP_ID }}
+          private-key: ${{ secrets.GITOPS_APP_PRIVATE_KEY }}
+          owner: huzaifa678
+          repositories: SAAS-Continious-Delivery
+
+      - name: Configure AWS credentials
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_DEPLOY_ROLE_ARN }}
+          aws-region: ${{ env.AWS_REGION }}
+
+      - name: Resolve ECR URL and verify the tag exists
+        id: ecr
+        env:
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          set -euo pipefail
+          ECR_URL=$(aws ecr describe-repositories --repository-names "${ECR_REPO}" \
+            --query 'repositories[0].repositoryUri' --output text)
+          echo "url=$ECR_URL" >> "$GITHUB_OUTPUT"
+          if ! aws ecr describe-images --repository-name "${ECR_REPO}" \
+               --image-ids imageTag="$IMAGE_TAG" >/dev/null 2>&1; then
+            echo "::error::image tag '$IMAGE_TAG' not found in ECR repo '${ECR_REPO}'."
+            exit 1
+          fi
+          echo "promoting ${ECR_REPO}:$IMAGE_TAG -> staging"
+
+      - name: Update values-staging.yaml
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          ECR_URL: ${{ steps.ecr.outputs.url }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          set -euo pipefail
+          git clone https://x-access-token:${GH_TOKEN}@github.com/huzaifa678/SAAS-Continious-Delivery.git /tmp/cd
+          cd /tmp/cd
+          wget -qO /usr/local/bin/yq \
+            https://github.com/mikefarah/yq/releases/download/v4.44.3/yq_linux_amd64
+          chmod +x /usr/local/bin/yq
+          yq -i '.image.repository = strenv(ECR_URL)' gitops/infra/backstage/values-staging.yaml
+          yq -i '.image.tag = strenv(IMAGE_TAG)' gitops/infra/backstage/values-staging.yaml
+
+      - name: Commit and push
+        env:
+          GH_TOKEN: ${{ steps.app-token.outputs.token }}
+          IMAGE_TAG: ${{ inputs.image_tag }}
+        run: |
+          set -euo pipefail
+          cd /tmp/cd
+          git config user.email "${{ steps.app-token.outputs.installation-id }}+saas-gitops-bot[bot]@users.noreply.github.com"
+          git config user.name "SAAS-gitops-bot[bot]"
+          git add gitops/infra/backstage/values-staging.yaml
+          if git diff --cached --quiet; then
+            echo "values-staging.yaml already at ${IMAGE_TAG} — nothing to commit."
+            exit 0
+          fi
+          git commit -m "cd(backstage): promote ${IMAGE_TAG} to staging"
+          git push
