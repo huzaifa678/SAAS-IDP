@@ -23,6 +23,7 @@
   },
   "devDependencies": {
     "@backstage/cli": "^0.36.5",
+    "@types/follow-redirects": "^1",
     "@types/jest": "^30.0.0",
     "typescript": "~5.4.0"
   },
@@ -39,10 +40,12 @@
     "brace-expansion@^5.0.8": "5.0.11",
     "compression": "1.8.2",
     "fast-uri": "3.1.7",
+    "follow-redirects": "1.16.1",
     "form-data@~2.3.2": "2.5.6",
     "handlebars": "4.7.10",
     "js-yaml": "4.3.2",
     "jsonpath-plus@^7.2.0": "10.3.0",
+    "markdown-it": "14.3.3",
     "proxy-addr": "2.0.8",
     "shell-quote": "1.11.0",
     "source-map-js": "1.2.2",
@@ -53,5 +56,9 @@
     "undici@^7.24.0": "7.29.1",
     "undici@^8.4.1": "8.10.2",
     "webpack-dev-middleware": "7.4.6"
+  },
+  "dependencies": {
+    "follow-redirects": "1.16.1",
+    "markdown-it": "14.3.3"
   }
 }
