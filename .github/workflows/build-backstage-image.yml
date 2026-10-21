@@ -77,7 +77,6 @@ jobs:
           push: ${{ github.ref == 'refs/heads/main' }}
           tags: |
             ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ steps.meta.outputs.tag }}
-            ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:dev
           cache-from: type=gha
           cache-to: type=gha,mode=max
 
