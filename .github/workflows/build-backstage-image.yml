@@ -99,7 +99,7 @@ jobs:
         uses: aquasecurity/trivy-action@v0.36.0
         with:
           scan-type: image
-          image-ref: ${{ steps.ecr.outputs.url }}:sha-${{ github.sha }}
+          image-ref: ${{ steps.ecr.outputs.registry }}/${{ env.ECR_REPO }}:${{ needs.build.outputs.tag }}
           scanners: vuln
           severity: CRITICAL,HIGH
           ignore-unfixed: true
