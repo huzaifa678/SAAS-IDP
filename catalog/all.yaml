@@ -85,3 +85,53 @@ spec:
   type: identity-provider
   owner: platform-team
   system: platform
+---
+# The AI platform: the agent service plus the governance around it (the harness
+# boundaries and their OPA policy bundle). TechDocs for the whole platform is built
+# from this repo (mkdocs.yml + docs/), surfaced on this System's Docs tab.
+apiVersion: backstage.io/v1alpha1
+kind: System
+metadata:
+  name: ai-platform
+  description: The agent service and its AI governance — memory, tools, I/O guardrails, budgets.
+  annotations:
+    backstage.io/techdocs-ref: dir:.
+spec:
+  owner: platform-team
+  domain: saas
+---
+# The policy-as-code bundle the agent-service harnesses consult (OPA/Rego): the
+# agent/memory, agent/tools and agent/io decisions. Lives in the agent-service repo
+# under policy/agent and is loaded by the OPA sidecar on the runtime path.
+apiVersion: backstage.io/v1alpha1
+kind: Resource
+metadata:
+  name: agent-guardrails-policy
+  description: OPA/Rego policy bundle governing agent memory, tool authorization and I/O guardrails.
+  annotations:
+    github.com/project-slug: huzaifa678/agent-service
+spec:
+  type: policy-bundle
+  owner: platform-team
+  system: ai-platform
+---
+# The agent service's governance decision surface — the harness boundaries exposed as
+# a logical API that the OPA sidecar adjudicates (recall/persist, tool enable/invoke,
+# input/output, budget). A catalog handle for the AI governance contract.
+apiVersion: backstage.io/v1alpha1
+kind: API
+metadata:
+  name: agent-governance
+  description: The agent service's guardrail decision points (memory, tools, I/O, budget).
+spec:
+  type: grpc
+  lifecycle: experimental
+  owner: platform-team
+  system: ai-platform
+  definition: |
+    # Governance boundaries adjudicated by the agent-service harnesses (OPA-backed):
+    #   memory  : RECALL | PERSIST   -> {allow, reason}
+    #   tools   : ENABLE | INVOKE    -> {allow, reason}
+    #   io      : INPUT  | OUTPUT    -> {allow, reason}
+    #   budget  : per-conversation token + cost ceilings -> 429 when exceeded
+    # See TechDocs: ai-platform-guardrails.

@@ -1,0 +1,11 @@
+{
+  "agent": {
+    "tenants": {
+      "${{ values.name }}": {
+        "allowed_tools": ["web_search", "calculator"],
+        "allow_code_execution": false,
+        "min_grounding": 0
+      }
+    }
+  }
+}

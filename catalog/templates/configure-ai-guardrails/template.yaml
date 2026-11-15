@@ -1,0 +1,165 @@
+apiVersion: scaffolder.backstage.io/v1beta3
+kind: Template
+metadata:
+  name: configure-ai-guardrails
+  title: Configure AI Agent Guardrails
+  description: >-
+    Self-service AI governance for the agent service. Pick the guardrails you want —
+    tool authorization, input/output screening, and a per-conversation token/cost
+    budget — and this generates the agent-service governance values overlay plus an
+    OPA tenant data document, opened as a PR to SAAS-Continious-Delivery. On merge
+    ArgoCD reconciles the overlay; ceilings and allow-lists take effect with no code
+    redeploy. See TechDocs: AI guardrails golden path.
+  tags:
+    - ai
+    - guardrails
+    - governance
+    - opa
+    - gitops
+spec:
+  owner: group:default/platform-team
+  type: resource
+  parameters:
+    - title: Target
+      required:
+        - serviceName
+        - owner
+      properties:
+        serviceName:
+          title: Agent service
+          type: string
+          description: The AI service these guardrails apply to.
+          default: agent-service
+          pattern: '^[a-z][a-z0-9-]*-service$'
+        owner:
+          title: Owner
+          type: string
+          description: Team that owns the configuration.
+          default: platform-team
+          ui:field: OwnerPicker
+          ui:options:
+            catalogFilter:
+              kind: Group
+        opaBaseUrl:
+          title: OPA sidecar URL
+          type: string
+          description: Address of the OPA sidecar the harness calls on the runtime path.
+          default: http://localhost:8181
+    - title: Tools and I/O guardrails
+      properties:
+        toolPolicyEnabled:
+          title: Enforce tool authorization
+          type: boolean
+          description: Gate every tool the agent enables or invokes through the agent/tools policy.
+          default: true
+        allowedTools:
+          title: Tool allow-list
+          type: array
+          description: >-
+            Tools this tenant may use (empty = no allow-list, deny-list rules still apply).
+          items:
+            type: string
+            enum:
+              - web_search
+              - calculator
+              - code_interpreter
+          uniqueItems: true
+          default:
+            - web_search
+            - calculator
+        allowCodeExecution:
+          title: Allow code_interpreter
+          type: boolean
+          description: Entitle this tenant to the code-execution tool.
+          default: false
+        guardrailEnabled:
+          title: Enforce input/output guardrails
+          type: boolean
+          description: Screen inbound messages (injection) and outbound answers (leakage, grounding).
+          default: true
+        minGrounding:
+          title: Minimum answer grounding (0–1)
+          type: number
+          description: >-
+            Withhold answers whose retrieval confidence is below this floor. 0 = off
+            (non-RAG questions are never blocked).
+          default: 0
+          minimum: 0
+          maximum: 1
+        failOpen:
+          title: Fail-open when OPA is unreachable
+          type: boolean
+          description: >-
+            false = fail-closed (block/deny, the safe default); true = fail-open (allow).
+          default: false
+    - title: Budget
+      properties:
+        budgetEnabled:
+          title: Enforce a spend budget
+          type: boolean
+          description: Refuse a conversation once it exhausts its token or cost ceiling (HTTP 429).
+          default: false
+        maxTokens:
+          title: Max tokens per conversation
+          type: integer
+          description: Cumulative token ceiling; 0 = unlimited.
+          default: 0
+          minimum: 0
+        maxCostUsd:
+          title: Max cost per conversation (USD)
+          type: string
+          description: Cumulative cost ceiling in USD; 0 = unlimited.
+          default: "0"
+          pattern: '^[0-9]+(\.[0-9]{1,4})?$'
+  steps:
+    - id: fetch
+      name: Render the governance overlay and OPA data document
+      action: fetch:template
+      input:
+        url: ./skeleton
+        values:
+          serviceName: ${{ parameters.serviceName }}
+          owner: ${{ parameters.owner }}
+          opaBaseUrl: ${{ parameters.opaBaseUrl }}
+          toolPolicyEnabled: ${{ parameters.toolPolicyEnabled }}
+          allowedTools: ${{ parameters.allowedTools }}
+          allowCodeExecution: ${{ parameters.allowCodeExecution }}
+          guardrailEnabled: ${{ parameters.guardrailEnabled }}
+          minGrounding: ${{ parameters.minGrounding }}
+          failOpen: ${{ parameters.failOpen }}
+          budgetEnabled: ${{ parameters.budgetEnabled }}
+          maxTokens: ${{ parameters.maxTokens }}
+          maxCostUsd: ${{ parameters.maxCostUsd }}
+    - id: pr
+      name: Open PR to SAAS-Continious-Delivery
+      action: publish:github:pull-request
+      input:
+        repoUrl: github.com?owner=huzaifa678&repo=SAAS-Continious-Delivery
+        branchName: ai-guardrails-${{ parameters.serviceName }}
+        title: 'feat(ai): configure guardrails for ${{ parameters.serviceName }}'
+        description: |
+          Configures AI governance for `${{ parameters.serviceName }}`:
+
+          - **Tool authorization**: ${{ parameters.toolPolicyEnabled }} (allow-list:
+            `${{ parameters.allowedTools }}`, code_interpreter:
+            `${{ parameters.allowCodeExecution }}`)
+          - **I/O guardrails**: ${{ parameters.guardrailEnabled }} (min grounding:
+            `${{ parameters.minGrounding }}`, fail-open: `${{ parameters.failOpen }}`)
+          - **Budget**: ${{ parameters.budgetEnabled }} (max tokens:
+            `${{ parameters.maxTokens }}`, max cost USD: `${{ parameters.maxCostUsd }}`)
+
+          Two artifacts under `platform/ai-governance/${{ parameters.serviceName }}/`:
+
+          1. `values.yaml` — Helm values overlay setting the harness env flags on the
+             deployment. **One manual wiring step**: add this overlay to the service's
+             Argo CD Application `valueFiles` (shown in `README.md`).
+          2. `governance.json` — the OPA tenant data document (tool allow-list, code
+             entitlement, grounding floor). Loaded by the OPA sidecar; consumed by the
+             `agent/tools` and `agent/io` rules via `input.attributes` once `TenantId`
+             is threaded end-to-end.
+
+          Generated by the Backstage scaffolder. See TechDocs: AI guardrails golden path.
+  output:
+    links:
+      - title: Open the PR
+        url: ${{ steps.pr.output.remoteUrl }}
