@@ -1,0 +1,11 @@
+{
+  "agent": {
+    "tenants": {
+      "${{ values.serviceName }}": {
+        "allowed_tools": ${{ values.allowedTools | dump }},
+        "allow_code_execution": ${{ values.allowCodeExecution }},
+        "min_grounding": ${{ values.minGrounding }}
+      }
+    }
+  }
+}
